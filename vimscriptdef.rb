@@ -2,8 +2,8 @@
 # @Author:      Tom Link (micathom AT gmail com)
 # @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 # @Created:     2010-11-06.
-# @Last Change: 2010-11-06.
-# @Revision:    69
+# @Last Change: 2010-11-07.
+# @Revision:    88
 
 require 'optparse'
 require 'rbconfig'
@@ -212,19 +212,22 @@ class VimScriptDef
                     $logger.debug "git log --oneline #{latest_tag}.."
                     changes = `git log --oneline #{latest_tag}..`
                     unless changes.empty?
-                        changes = changes.split(/\n/).map do |line|
+                        changes = changes.split(/\n/)
+                        changes.map! do |line|
                             line.sub(/^\S+/, '-')
                         end
+                        changes.reverse!
                         if @config['ignore_git_messages_rx']
                             ignore_git_messages_rx = Regexp.new(@config['ignore_git_messages_rx'])
                             changes.delete_if {|line| line =~ ignore_git_messages_rx}
                         end
-                        script_def['message'] = changes.join("\n")
-                        script_def['message'] << "\n" unless script_def['message'].empty?
+                        unless changes.empty?
+                            script_def['message'] = changes.join("\n")
+                            script_def['message'] << "\n"
+                        end
                     end
                 end
             end
-            # p "DBG", script_def['message']
             if script_def['message'].empty? and @config.has_key?('history_fmt')
                 script_def['message'] = @config['history_fmt'] % name
                 script_def['message'] << "\n"
@@ -240,10 +243,13 @@ class VimScriptDef
             end
 
             case output
-            when File
+            when String
                 File.open(output, 'w') {|io| YAML.dump(script_def, io)}
             when IO
                 YAML.dump(script_def, output)
+            else
+                $logger.fatal "Internal error: Unsupported output type: #{output}"
+                exit 5
             end
         end
     end
