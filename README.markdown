@@ -48,7 +48,7 @@ Provide all arguments on the command line:
 
 
 
-Creating YAML plugin definitions with vimscriptdef.rb
+Create YAML plugin definitions with vimscriptdef.rb
 ------------------------------------------------------
 
 The vimscriptdef.rb ruby script can be used to create a YAML plugin 
