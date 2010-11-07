@@ -21,8 +21,7 @@ Example YAML file:
       Fixed this
       Done that
 
-[vimball.rb](http://github.org/tomtom/vimball.rb) can generate such YAML 
-files from a vimball recipe.
+vimscriptdef.rb can generate such YAML files from a vimball recipe.
 
 Those values can also be provided on the command line.
 
@@ -70,9 +69,10 @@ convention:
   where `VERSION_NUMBER` is an integer that complies with vim's version 
   numbering system (see :help v:version).
 
-* If you use tags, vimball.rb will compile the comment version from the 
-  commit messages since the latest tag. The following tag formats are 
-  supported (e.g. if the version number is 1.02): v102, 102, 1.02.
+* If you use git tags, vimscriptdef.rb will compile the comment version 
+  from the commit messages since the latest tag. The following tag 
+  formats are supported (e.g. if the version number is 1.02): v102, 102, 
+  1.02.
 
   If you don't use tags, version comments are limited to simple messages 
   if the configuration file defines a field `history_fmt` that must 
@@ -87,4 +87,5 @@ Dependencies
 
 * ruby 1.8
 * www/mechanize
+* git (to extract log messages and tags for the YAML script definition)
 
