@@ -2,8 +2,8 @@
 # @Author:      Tom Link (micathom AT gmail com)
 # @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 # @Created:     2010-11-06.
-# @Last Change: 2010-11-07.
-# @Revision:    88
+# @Last Change: 2010-11-08.
+# @Revision:    91
 
 require 'optparse'
 require 'rbconfig'
@@ -229,7 +229,7 @@ class VimScriptDef
                 end
             end
             if script_def['message'].empty? and @config.has_key?('history_fmt')
-                script_def['message'] = @config['history_fmt'] % name
+                script_def['message'] = @config['history_fmt'] % @config['name']
                 script_def['message'] << "\n"
             end
             vba = File.open(@config['archive'], 'rb') {|io| io.read}
