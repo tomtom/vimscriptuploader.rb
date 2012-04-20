@@ -148,7 +148,7 @@ class VimScriptUploader
         @config = config
         @args   = args
         @logged_in = false
-        @agent = WWW::Mechanize.new do |agent|
+        @agent = ::Mechanize.new do |agent|
             # agent.user_agent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.4) Gecko/20100513 Firefox/3.6.4"
             agent.user_agent = "#{APPNAME}/#{VERSION}"
         end
