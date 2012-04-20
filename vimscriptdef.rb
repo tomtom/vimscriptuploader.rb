@@ -2,8 +2,8 @@
 # @Author:      Tom Link (micathom AT gmail com)
 # @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 # @Created:     2010-11-06.
-# @Last Change: 2010-11-08.
-# @Revision:    91
+# @Last Change: 2012-04-20.
+# @Revision:    110
 
 require 'optparse'
 require 'rbconfig'
@@ -46,6 +46,7 @@ class VimScriptDef
 
             config = Hash.new
             config['dir'] = '.'
+            config['cmd'] = nil
             config['format'] = 'vba'
 
             opts = OptionParser.new do |opts|
@@ -90,32 +91,15 @@ class VimScriptDef
                 end
 
                 opts.on('--print-version', 'Print the plugins current version number') do |value|
-                    puts VimScriptDef.new(config).get_version
-                    exit
+                    config['cmd'] = :print_version
                 end
 
                 opts.on('--print-saved-version', 'Print the plugins last saved version number') do |value|
-                    yaml = config['outfile']
-                    if File.exist?(yaml)
-                        script_def = YAML.load_file(yaml)
-                        puts script_def['version']
-                    end
-                    exit
+                    config['cmd'] = :print_saved_version
                 end
 
                 opts.on('--recipe FILENAME', String, 'A vimball recipe (implies --archive, --name and --out)') do |value|
-                    config['files'] = File.readlines(value).map do |filename|
-                        filename = filename.chomp
-                    end
-                    config['name'] = File.basename(value, '.*')
-                    config['archive'] ||= File.join(
-                        File.dirname(value),
-                        config['name'] + '.vba'
-                    )
-                    config['outfile'] ||= File.join(
-                        File.dirname(value),
-                        config['name'] + '.yml'
-                    )
+                    config['filename'] = value
                 end
 
                 opts.separator ' '
@@ -139,7 +123,23 @@ class VimScriptDef
             end
             $logger.debug "command-line arguments: #{args}"
             argv = opts.parse!(args)
+
+            if config['filename']
+                config['files'] = File.readlines(config['filename']).map do |filename|
+                    filename = filename.chomp
+                end
+                config['name'] = File.basename(config['filename'], '.*')
+                config['archive'] ||= File.join(
+                    File.dirname(config['filename']),
+                    config['name'] + '.' + config['format']
+                )
+                config['outfile'] ||= File.join(
+                    File.dirname(config['filename']),
+                    config['name'] + '.yml'
+                )
+            end
             config['files'] ||= argv
+
             $logger.debug "config: #{config}"
             $logger.debug "argv: #{argv}"
 
@@ -154,6 +154,7 @@ class VimScriptDef
                 exit 5
             end
 
+            config['opts'] = opts
             return VimScriptDef.new(config)
         end
 
@@ -165,6 +166,29 @@ class VimScriptDef
     end
 
     def process
+        m = "process_#{@config['cmd'] || 'default'}"
+        if respond_to?(m)
+            send(m)
+        else
+            $logger.fatal "Unknown command: #{@config['cmd']}"
+            puts @config['opts']
+            exit 5
+        end
+    end
+
+    def process_print_version
+        puts get_version
+    end
+
+    def process_print_saved_version
+        yaml = @config['outfile']
+        if File.exist?(yaml)
+            script_def = YAML.load_file(yaml)
+            puts script_def['version']
+        end
+    end
+
+    def process_default
         FileUtils.cd(@config['dir']) do
             output = @config['outfile'] || $stdout
             if output == '-'
@@ -237,8 +261,8 @@ class VimScriptDef
                 script_def['message'] = @config['history_fmt'] % @config['name']
                 script_def['message'] << "\n"
             end
-            vba = File.open(@config['archive'], 'rb') {|io| io.read}
-            script_def['message'] << "MD5 checksum: #{Digest::MD5.hexdigest(vba)}"
+            arc = File.open(@config['archive'], 'rb') {|io| io.read}
+            script_def['message'] << "MD5 checksum: #{Digest::MD5.hexdigest(arc)}"
 
             script_def['file'] = @config['archive']
 
