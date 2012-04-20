@@ -2,9 +2,10 @@
 # @Author:      Tom Link (micathom AT gmail com)
 # @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 # @Created:     2010-11-01.
-# @Last Change: 2010-11-06.
-# @Revision:    57
+# @Last Change: 2012-04-20.
+# @Revision:    63
 
+require 'rubygems'
 require 'optparse'
 require 'rbconfig'
 require 'logger'
