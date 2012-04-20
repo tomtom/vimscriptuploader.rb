@@ -46,6 +46,7 @@ class VimScriptDef
 
             config = Hash.new
             config['dir'] = '.'
+            config['format'] = 'vba'
 
             opts = OptionParser.new do |opts|
                 opts.banner =  "Usage: #{File.basename($0)} [OPTIONS] [NAME FILES...]"
@@ -74,6 +75,10 @@ class VimScriptDef
                         $logger.fatal "Configuration file not found: #{value}"
                         exit 5
                     end
+                end
+
+                opts.on('--format FORMAT', ['zip', 'vba'], 'Redistribution format') do |value|
+                    config['format'] = value
                 end
 
                 opts.on('-n', '--name NAME', String, 'The plugin name') do |value|
